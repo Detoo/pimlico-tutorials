@@ -3,21 +3,21 @@ import { UserOperation, bundlerActions, getSenderAddress, signUserOperationHashW
 import { pimlicoBundlerActions, pimlicoPaymasterActions } from "permissionless/actions/pimlico"
 import { Hex, concat, createClient, createPublicClient, encodeFunctionData, http } from "viem"
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
-import { lineaTestnet } from "viem/chains"
+import { baseGoerli } from "viem/chains"
 dotenv.config()
 
 // CREATE THE CLIENTS
 const publicClient = createPublicClient({
     transport: http("https://rpc.goerli.linea.build/"),
-    chain: lineaTestnet
+    chain: baseGoerli
 })
 
-const chain = "linea-testnet" // find the list of chain names on the Pimlico verifying paymaster reference page
+const chain = "base-goerli" // find the list of chain names on the Pimlico verifying paymaster reference page
 const apiKey = process.env.PIMLICO_API_KEY // REPLACE THIS
 
 const bundlerClient = createClient({
     transport: http(`https://api.pimlico.io/v1/${chain}/rpc?apikey=${apiKey}`),
-    chain: lineaTestnet
+    chain: baseGoerli
 })
     .extend(bundlerActions)
     .extend(pimlicoBundlerActions)
@@ -25,7 +25,7 @@ const bundlerClient = createClient({
 const paymasterClient = createClient({
     // ⚠️ using v2 of the API ⚠️
     transport: http(`https://api.pimlico.io/v2/${chain}/rpc?apikey=${apiKey}`),
-    chain: lineaTestnet
+    chain: baseGoerli
 }).extend(pimlicoPaymasterActions)
 
 // GENERATE THE INITCODE
@@ -125,7 +125,7 @@ console.log("Received paymaster sponsor result:", sponsorUserOperationResult)
 const signature = await signUserOperationHashWithECDSA({
     account: owner,
     userOperation: sponsoredUserOperation,
-    chainId: lineaTestnet.id,
+    chainId: baseGoerli.id,
     entryPoint: ENTRY_POINT_ADDRESS
 })
 sponsoredUserOperation.signature = signature
@@ -145,4 +145,4 @@ console.log("Querying for receipts...")
 const receipt = await bundlerClient.waitForUserOperationReceipt({ hash: userOperationHash })
 const txHash = receipt.receipt.transactionHash
 
-console.log(`UserOperation included: https://goerli.lineascan.build/tx/${txHash}`)
+console.log(`UserOperation included: https://goerli.basescan.org/tx/${txHash}`)
